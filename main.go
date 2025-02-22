@@ -28,6 +28,11 @@ func (s *GreetServer) Greet(
 	return res, nil
 }
 
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
+}
+
 // var (
 // 	db     *sql.DB
 // 	dbErr  error
@@ -41,8 +46,13 @@ func (s *GreetServer) Greet(
 func main() {
 	greeter := &GreetServer{}
 	mux := http.NewServeMux()
+
 	path, handler := apifrontv1connect.NewGreetServiceHandler(greeter)
+
 	mux.Handle(path, handler)
+	// Readiness Probe 用のエンドポイント
+	mux.HandleFunc("/", healthCheckHandler)
+
 	http.ListenAndServe(
 		"localhost:8080",
 		// Use h2c so we can serve HTTP/2 without TLS.
