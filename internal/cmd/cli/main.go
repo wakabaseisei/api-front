@@ -105,10 +105,10 @@ var downCmd = &cobra.Command{
 	Use:   "down",
 	Short: "Revert the last migration",
 	Run: func(cmd *cobra.Command, args []string) {
+		region := "ap-northeast-1"
 		rdsHost := os.Getenv("RDS_HOST")
 		dbName := os.Getenv("DB_NAME")
 		iamUser := os.Getenv("DB_USER")
-		region := os.Getenv("AWS_REGION")
 		port := os.Getenv("DB_PORT")
 
 		token, err := generateAuthToken(rdsHost, iamUser, region)
