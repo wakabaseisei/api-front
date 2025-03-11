@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	connectrpc.com/connect v1.18.1
+	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2/config v1.29.8
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.11
 	github.com/go-sql-driver/mysql v1.8.1
