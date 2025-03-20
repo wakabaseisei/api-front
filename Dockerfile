@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=bind,target=. \
     go build -o /bin/app ./internal/cmd/app
 
-FROM gcr.io/distroless/base-debian12:noroot
+FROM gcr.io/distroless/base-debian12:nonroot
 
 COPY --from=builder /bin/app /bin/app
 
