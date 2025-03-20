@@ -45,6 +45,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
       - name: Check for migration file changes
         id: check_migrations
         run: |

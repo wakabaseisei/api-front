@@ -1,37 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
 
-	"connectrpc.com/connect"
 	_ "github.com/go-sql-driver/mysql"
-	apifrontv1 "github.com/wakabaseisei/ms-protobuf/gen/go/ms/apifront/v1"
+	"github.com/wakabaseisei/api-front/internal/driver/grpc"
 	"github.com/wakabaseisei/ms-protobuf/gen/go/ms/apifront/v1/apifrontv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
-
-type GreetServer struct{}
-
-func (s *GreetServer) Greet(
-	ctx context.Context,
-	req *connect.Request[apifrontv1.GreetRequest],
-) (*connect.Response[apifrontv1.GreetResponse], error) {
-	log.Println("Request headers: ", req.Header())
-	res := connect.NewResponse(&apifrontv1.GreetResponse{
-		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.Name),
-	})
-	res.Header().Set("Greet-Version", "v1")
-	return res, nil
-}
-
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "OK")
-}
 
 // var (
 // 	db     *sql.DB
@@ -44,13 +22,12 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 // )
 
 func main() {
-	greeter := &GreetServer{}
+	service := grpc.NewAPIFrontService()
 	mux := http.NewServeMux()
 
-	path, handler := apifrontv1connect.NewGreetServiceHandler(greeter)
+	path, handler := apifrontv1connect.NewGreetServiceHandler(service)
 
 	mux.Handle(path, handler)
-	// Readiness Probe 用のエンドポイント
 	mux.HandleFunc("/", healthCheckHandler)
 
 	http.ListenAndServe(
@@ -58,6 +35,11 @@ func main() {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
 }
 
 // func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
