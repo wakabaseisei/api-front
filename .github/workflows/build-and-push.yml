@@ -54,6 +54,31 @@ jobs:
           else
             echo "MIGRATION_CHANGED=false" >> $GITHUB_ENV
           fi
+      - name: Docker meta(for migrate)
+        if: env.MIGRATION_CHANGED == 'true'
+        id: meta-migrate
+        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: api-front
+        with:
+          images: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=raw,value=dev-{{date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo'}}-{{sha}}-migrate
+          labels: |
+            type=migrate
+      - name: docker build and push ECR(for migrate)
+        if: env.MIGRATION_CHANGED == 'true'
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6.10.0
+        with:
+          file: ./Dockerfile.migrate
+          push: true
+          tags: ${{ steps.meta-migrate.outputs.tags }}
+          labels: ${{ steps.meta-migrate.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
       - name: Deploy to Lambda
         if: env.MIGRATION_CHANGED == 'true'
         env:
@@ -61,7 +86,7 @@ jobs:
           ECR_REPOSITORY: api-front
           FUNCTION_NAME: migrate-lambda-api-front
         run: |
-          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --image-uri ${{ steps.meta.outputs.tags }}
+          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --image-uri ${{ steps.meta-migrate.outputs.tags }}
           # https://docs.aws.amazon.com/cli/latest/reference/lambda/wait/#cli-aws-lambda-wait
           aws lambda wait function-updated-v2 --function-name ${{ env.FUNCTION_NAME }}
       - name: Invoke Lambda for DB Migration

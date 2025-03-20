@@ -14,19 +14,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=bind,target=. \
     go build -o /bin/app ./internal/cmd/app
 
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=bind,target=. \
-    go build -o /bin/migrate-lambda ./internal/cmd/cli
-
-RUN go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.2
-
-# TODO: nonrootにしたい
-FROM gcr.io/distroless/base-debian12:debug
+FROM gcr.io/distroless/base-debian12:noroot
 
 COPY --from=builder /bin/app /bin/app
-COPY --from=builder /bin/migrate-lambda /bin/migrate-lambda
-COPY --from=builder /go/bin/migrate /bin/migrate
-COPY db/migrations /db/migrations
 
 ENTRYPOINT ["/bin/app"]
