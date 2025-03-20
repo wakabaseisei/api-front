@@ -61,7 +61,7 @@ jobs:
           ECR_REPOSITORY: api-front
           FUNCTION_NAME: migrate-lambda-api-front
         run: |
-          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --image-uri ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ steps.meta.outputs.tags }}
+          aws lambda update-function-code --function-name ${{ env.FUNCTION_NAME }} --image-uri ${{ steps.meta.outputs.tags }}
           # https://docs.aws.amazon.com/cli/latest/reference/lambda/wait/#cli-aws-lambda-wait
           aws lambda wait function-updated-v2 --function-name ${{ env.FUNCTION_NAME }}
       - name: Invoke Lambda for DB Migration
