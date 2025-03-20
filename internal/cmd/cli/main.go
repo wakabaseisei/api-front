@@ -22,8 +22,9 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	iamUser := os.Getenv("DB_USER")
 	region := os.Getenv("AWS_REGION")
 	port := os.Getenv("DB_PORT")
+	dbEndpoint := fmt.Sprintf("%s:%s", rdsHost, port)
 
-	token, err := generateAuthToken(rdsHost, iamUser, region)
+	token, err := generateAuthToken(dbEndpoint, iamUser, region)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -31,8 +32,8 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?tls=true&multiStatements=true",
-		iamUser, token, rdsHost, port, dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&multiStatements=true",
+		iamUser, token, dbEndpoint, dbName)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
