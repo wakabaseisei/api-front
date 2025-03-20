@@ -17,7 +17,7 @@ import (
 )
 
 func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	rdsHost := os.Getenv("RDS_HOST")
+	rdsHost := os.Getenv("DB_HOST")
 	dbName := os.Getenv("DB_NAME")
 	iamUser := os.Getenv("DB_USER")
 	region := os.Getenv("AWS_REGION")
