@@ -21,7 +21,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 RUN go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.2
 
-FROM gcr.io/distroless/base-debian12:nonroot
+# TODO: nonrootにしたい
+FROM gcr.io/distroless/base-debian12:debug
 
 COPY --from=builder /bin/app /bin/app
 COPY --from=builder /bin/migrate-lambda /bin/migrate-lambda
