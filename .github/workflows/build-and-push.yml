@@ -49,7 +49,7 @@ jobs:
       - name: Check for migration file changes
         id: check_migrations
         run: |
-          if git diff --name-only origin/main...HEAD | grep -q "^db/migrations/"; then
+          if git diff --name-only HEAD^..HEAD | grep -q "^db/migrations/"; then
             echo "MIGRATION_CHANGED=true" >> $GITHUB_ENV
           else
             echo "MIGRATION_CHANGED=false" >> $GITHUB_ENV
