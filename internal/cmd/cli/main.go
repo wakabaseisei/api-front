@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 
@@ -44,10 +43,11 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-	escapedCAPath := url.QueryEscape(caPath)
+	// dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true&allowCleartextPasswords=1",
+	// 	iamUser, token, dbEndpoint, dbName, escapedCAPath)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true&allowCleartextPasswords=1",
-		iamUser, token, dbEndpoint, dbName, escapedCAPath)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&multiStatements=true&allowCleartextPasswords=true",
+		iamUser, token, dbEndpoint, dbName)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -61,7 +61,7 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	if err := runMigration(db, dbName); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Migration failed %v: %v", dsn, err),
+			Body:       fmt.Sprintf("Migration failed: %v", err),
 		}, nil
 	}
 
