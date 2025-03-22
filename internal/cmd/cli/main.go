@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -12,7 +14,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
-	_ "github.com/go-sql-driver/mysql"
+
+	dmysql "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 )
@@ -34,6 +37,13 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	}
 
 	caPath := "/etc/ssl/certs/rds-ca.pem"
+	if err := registerRDSTLSConfig(caPath); err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("TLS config error: %v", err),
+		}, nil
+	}
+
 	escapedCAPath := url.QueryEscape(caPath)
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true",
@@ -101,6 +111,24 @@ func runMigration(db *sql.DB, dbName string) error {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}
+
+	return nil
+}
+
+func registerRDSTLSConfig(caPath string) error {
+	rootCertPool := x509.NewCertPool()
+	caPem, err := os.ReadFile(caPath)
+	if err != nil {
+		return fmt.Errorf("failed to read RDS CA file: %w", err)
+	}
+
+	if ok := rootCertPool.AppendCertsFromPEM(caPem); !ok {
+		return fmt.Errorf("failed to append RDS CA cert")
+	}
+
+	dmysql.RegisterTLSConfig("rds", &tls.Config{
+		RootCAs: rootCertPool,
+	})
 
 	return nil
 }
