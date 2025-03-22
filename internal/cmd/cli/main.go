@@ -35,13 +35,13 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-	caPath := "/etc/ssl/certs/rds-ca.pem"
-	if err := registerRDSTLSConfig(caPath); err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       fmt.Sprintf("TLS config error: %v", err),
-		}, nil
-	}
+	// caPath := "/etc/ssl/certs/rds-ca.pem"
+	// if err := registerRDSTLSConfig(caPath); err != nil {
+	// 	return events.APIGatewayProxyResponse{
+	// 		StatusCode: 500,
+	// 		Body:       fmt.Sprintf("TLS config error: %v", err),
+	// 	}, nil
+	// }
 
 	// dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true&allowCleartextPasswords=1",
 	// 	iamUser, token, dbEndpoint, dbName, escapedCAPath)
