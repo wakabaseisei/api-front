@@ -46,7 +46,7 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 
 	escapedCAPath := url.QueryEscape(caPath)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true&allowCleartextPasswords=1",
 		iamUser, token, dbEndpoint, dbName, escapedCAPath)
 
 	db, err := sql.Open("mysql", dsn)
