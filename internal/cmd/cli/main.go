@@ -61,7 +61,7 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	if err := runMigration(db, dbName); err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Migration failed: %v", err),
+			Body:       fmt.Sprintf("Migration failed %v: %v", dsn, err),
 		}, nil
 	}
 
