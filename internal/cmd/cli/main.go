@@ -32,7 +32,7 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&multiStatements=true",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=/etc/ssl/certs/rds-ca.pem&multiStatements=true",
 		iamUser, token, dbEndpoint, dbName)
 
 	db, err := sql.Open("mysql", dsn)
