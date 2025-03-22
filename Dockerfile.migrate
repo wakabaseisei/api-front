@@ -20,7 +20,7 @@ FROM debian:bullseye-slim
 
 RUN apt-get update && apt-get install -y ca-certificates curl
 
-RUN curl -sSf https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /etc/ssl/certs/rds-ca.pem
+# RUN curl -sSf https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /etc/ssl/certs/rds-ca.pem
 
 COPY --from=builder /bin/migrate-lambda /bin/migrate-lambda
 COPY --from=builder /go/bin/migrate /bin/migrate
