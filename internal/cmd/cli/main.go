@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -32,8 +33,11 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=/etc/ssl/certs/rds-ca.pem&multiStatements=true",
-		iamUser, token, dbEndpoint, dbName)
+	caPath := "/etc/ssl/certs/rds-ca.pem"
+	escapedCAPath := url.QueryEscape(caPath)
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=rds&x-tls-ca=%s&multiStatements=true",
+		iamUser, token, dbEndpoint, dbName, escapedCAPath)
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
