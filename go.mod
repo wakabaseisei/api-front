@@ -7,9 +7,11 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2/config v1.29.8
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.11
+	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/spf13/cobra v1.9.1
+	github.com/google/uuid v1.6.0
 	github.com/wakabaseisei/ms-protobuf/gen/go v0.0.1
 	golang.org/x/net v0.33.0
 )
@@ -28,11 +30,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.16 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 )
