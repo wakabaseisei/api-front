@@ -29,9 +29,13 @@ func (i *geetInteractor) Invoke(
 	*domain.User,
 	error,
 ) {
-	user, rerr := i.userRepository.Create(ctx, cmd)
-	if rerr != nil {
+	if rerr := i.userRepository.Create(ctx, cmd); rerr != nil {
 		return nil, fmt.Errorf("userRepository Create: %v", rerr)
+	}
+
+	user, ferr := i.userRepository.FindByID(ctx, cmd.ID)
+	if ferr != nil {
+		return nil, fmt.Errorf("userRepository FindByID: %v", ferr)
 	}
 
 	return user, nil

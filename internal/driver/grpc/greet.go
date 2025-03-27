@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"connectrpc.com/connect"
 
@@ -21,8 +22,9 @@ func (s *APIFrontService) Greet(
 	log.Println("Request headers: ", req.Header())
 
 	cmd := &domain.UserCommand{
-		ID:   uuid.NewString(),
-		Name: req.Msg.GetName(),
+		ID:        uuid.NewString(),
+		Name:      req.Msg.GetName(),
+		CreatedAt: time.Now(),
 	}
 	user, uerr := usecase.NewGreetInteractor(s.services.UserRepository).Invoke(ctx, cmd)
 	if uerr != nil {
