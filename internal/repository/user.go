@@ -2,15 +2,20 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/wakabaseisei/api-front/internal/domain"
 )
 
-type userRepository struct{}
+type userRepository struct {
+	conn *sql.DB
+}
 
-func NewUserRepository() *userRepository {
-	return &userRepository{}
+func NewUserRepository(conn *sql.DB) *userRepository {
+	return &userRepository{
+		conn: conn,
+	}
 }
 
 func (r *userRepository) Create(ctx context.Context, cmd *domain.UserCommand) (*domain.User, error) {

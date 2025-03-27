@@ -1,10 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/wakabaseisei/api-front/internal/config"
 	"github.com/wakabaseisei/api-front/internal/domain/repository"
 	"github.com/wakabaseisei/api-front/internal/driver/grpc"
 	infraRepo "github.com/wakabaseisei/api-front/internal/repository"
@@ -13,18 +20,25 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-// var (
-// 	db     *sql.DB
-// 	dbErr  error
-// 	dbName = "DatabaseName"
-// 	dbUser = "DatabaseUser"
-// 	dbHost = "mysqlcluster.cluster-123456789012.us-east-1.rds.amazonaws.com"
-// 	dbPort = 3306
-// 	region = "us-east-1"
-// )
-
 func main() {
-	services := repository.NewServices(infraRepo.NewUserRepository())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cfg, cerr := config.NewConfig(ctx)
+	if cerr != nil {
+		log.Fatalf("New Config: %v", cerr)
+	}
+
+	dbConn, dberr := infraRepo.NewDatabase(ctx, cfg.DBConfig, cfg.AWSDefaultConfig)
+	if dberr != nil {
+		log.Fatalf("New database: %v", dberr)
+	}
+	defer closeDBConn(dbConn)
+
+	sgCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	services := repository.NewServices(infraRepo.NewUserRepository(dbConn))
 	service := grpc.NewAPIFrontService(services)
 	mux := http.NewServeMux()
 
@@ -33,11 +47,30 @@ func main() {
 	mux.Handle(path, handler)
 	mux.HandleFunc("/", healthCheckHandler)
 
-	http.ListenAndServe(
-		"0.0.0.0:8080",
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
+	server := http.Server{
+		Addr:    "0.0.0.0:8080",
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		done <- server.ListenAndServe()
+	}()
+
+	select {
+	case err := <-done:
+		if err != http.ErrServerClosed {
+			log.Fatalf("HTTP server ListenAndServe: %v", err)
+		}
+	case <-sgCtx.Done():
+		log.Println("Server stopping")
+		c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := server.Shutdown(c); err != nil {
+			log.Fatalf("HTTP server Shutdown: %v", err)
+		}
+		log.Println("Server gracefully stopped")
+	}
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,44 +78,10 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "OK")
 }
 
-// func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-// 	dbErr = checkAuroraConnection()
-// 	if dbErr != nil {
-// 		http.Error(w, fmt.Sprintf("Database connection failed: %v", dbErr), http.StatusServiceUnavailable)
-// 		return
-// 	}
-// 	fmt.Fprintln(w, "OK")
-// }
-
-// func checkAuroraConnection() error {
-// 	dbEndpoint := fmt.Sprintf("%s:%d", dbHost, dbPort)
-
-// 	cfg, err := config.LoadDefaultConfig(context.TODO())
-// 	if err != nil {
-// 		return fmt.Errorf("configuration error: %w", err)
-// 	}
-
-// 	authToken, err := auth.BuildAuthToken(context.TODO(), dbEndpoint, region, dbUser, cfg.Credentials)
-// 	if err != nil {
-// 		return fmt.Errorf("create authentication token: %w", err)
-// 	}
-
-// 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&allowCleartextPasswords=true",
-// 		dbUser, authToken, dbEndpoint, dbName,
-// 	)
-
-// 	db, err := sql.Open("mysql", dsn)
-// 	if err != nil {
-// 		return fmt.Errorf("open database connection: %w", err)
-// 	}
-// 	defer db.Close()
-
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-
-// 	if err := db.PingContext(ctx); err != nil {
-// 		return fmt.Errorf("ping database: %w", err)
-// 	}
-
-// 	return nil
-// }
+func closeDBConn(db io.Closer) {
+	if cerr := db.Close(); cerr != nil {
+		log.Printf("closing db connection: %v", cerr)
+	} else {
+		log.Println("db connection gracefully closed")
+	}
+}
