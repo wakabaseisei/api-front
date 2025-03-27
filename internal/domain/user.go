@@ -9,6 +9,7 @@ type User struct {
 }
 
 type UserCommand struct {
-	ID   string
-	Name string
+	ID        string
+	Name      string
+	CreatedAt time.Time
 }

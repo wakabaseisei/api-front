@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
+	"fmt"
 
 	"github.com/wakabaseisei/api-front/internal/domain"
 )
@@ -18,11 +18,38 @@ func NewUserRepository(conn *sql.DB) *userRepository {
 	}
 }
 
-func (r *userRepository) Create(ctx context.Context, cmd *domain.UserCommand) (*domain.User, error) {
-	// TODO: Replace actual DB data later.
-	return &domain.User{
-		ID:        cmd.ID,
-		Name:      cmd.Name,
-		CreatedAt: time.Now(),
-	}, nil
+func (r *userRepository) Create(ctx context.Context, cmd *domain.UserCommand) error {
+	tx, err := r.conn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	query := `INSERT INTO Users (UserID, Name, CreatedAt) VALUES (?, ?, ?, ?)`
+	_, err = tx.ExecContext(ctx, query, cmd.ID, cmd.Name, cmd.CreatedAt)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("insert user: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *userRepository) FindByID(ctx context.Context, ID string) (*domain.User, error) {
+	query := `SELECT UserID, Name, CreatedAt FROM Users WHERE UserID = ?`
+
+	var user domain.User
+	err := r.conn.QueryRowContext(ctx, query, ID).Scan(&user.ID, &user.Name, &user.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found: %w", err)
+		}
+		return nil, fmt.Errorf("fetch user: %w", err)
+	}
+
+	return &user, nil
 }
