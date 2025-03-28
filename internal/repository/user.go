@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/wakabaseisei/api-front/internal/domain"
 )
@@ -52,4 +53,12 @@ func (r *userRepository) FindByID(ctx context.Context, ID string) (*domain.User,
 	}
 
 	return &user, nil
+}
+
+func (r *userRepository) Ping(ctx context.Context) error {
+	if err := r.conn.Ping(); err != nil {
+		log.Printf("Ping: %v", err)
+		return err
+	}
+	return nil
 }
