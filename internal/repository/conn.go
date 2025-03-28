@@ -13,7 +13,7 @@ import (
 )
 
 func NewDatabase(ctx context.Context, cfg config.DBConfig, awscfg aws.Config) (*sql.DB, error) {
-	token, terr := generateAuthToken(ctx, cfg.Host, cfg.UserName, awscfg)
+	token, terr := generateAuthToken(ctx, cfg.Endpoint(), cfg.UserName, awscfg)
 	if terr != nil {
 		return nil, fmt.Errorf("generate IAM Auth Token: %v", terr)
 	}
@@ -28,9 +28,9 @@ func NewDatabase(ctx context.Context, cfg config.DBConfig, awscfg aws.Config) (*
 	return db, nil
 }
 
-func generateAuthToken(ctx context.Context, host, user string, awscfg aws.Config) (string, error) {
+func generateAuthToken(ctx context.Context, endpoint, user string, awscfg aws.Config) (string, error) {
 	authenticationToken, terr := auth.BuildAuthToken(
-		ctx, host, awscfg.Region, user, awscfg.Credentials)
+		ctx, endpoint, awscfg.Region, user, awscfg.Credentials)
 	if terr != nil {
 		return "", terr
 	}
