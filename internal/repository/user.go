@@ -25,7 +25,7 @@ func (r *userRepository) Create(ctx context.Context, cmd *domain.UserCommand) er
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
-	query := `INSERT INTO Users (UserID, Name, CreatedAt) VALUES (?, ?, ?, ?)`
+	query := `INSERT INTO Users (UserID, Name, CreatedAt) VALUES (?, ?, ?)`
 	_, err = tx.ExecContext(ctx, query, cmd.ID, cmd.Name, cmd.CreatedAt)
 	if err != nil {
 		tx.Rollback()
