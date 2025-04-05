@@ -11,7 +11,6 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/wakabaseisei/api-front/internal/config"
 	"github.com/wakabaseisei/api-front/internal/domain/repository"
 	"github.com/wakabaseisei/api-front/internal/driver/grpc"
 	infraRepo "github.com/wakabaseisei/api-front/internal/repository"
@@ -21,24 +20,26 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	// TODO: Enable later
+	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// defer cancel()
 
-	cfg, cerr := config.NewConfig(ctx)
-	if cerr != nil {
-		log.Fatalf("New Config: %v", cerr)
-	}
+	// cfg, cerr := config.NewConfig(ctx)
+	// if cerr != nil {
+	// 	log.Fatalf("New Config: %v", cerr)
+	// }
 
-	dbConn, dberr := infraRepo.NewDatabase(ctx, cfg.DBConfig, cfg.AWSDefaultConfig)
-	if dberr != nil {
-		log.Fatalf("New database: %v", dberr)
-	}
-	defer closeDBConn(dbConn)
+	// dbConn, dberr := infraRepo.NewDatabase(ctx, cfg.DBConfig, cfg.AWSDefaultConfig)
+	// if dberr != nil {
+	// 	log.Fatalf("New database: %v", dberr)
+	// }
+	// defer closeDBConn(dbConn)
 
 	sgCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	services := repository.NewServices(infraRepo.NewUserRepository(dbConn))
+	// TODO: Enable later
+	services := repository.NewServices(infraRepo.NewUserRepository(nil))
 	service := grpc.NewAPIFrontService(services)
 	mux := http.NewServeMux()
 

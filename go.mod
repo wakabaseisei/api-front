@@ -11,8 +11,7 @@ require (
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/golang-migrate/migrate/v4 v4.18.2
-	github.com/google/uuid v1.6.0
-	github.com/wakabaseisei/ms-protobuf/gen/go v0.0.2
+	github.com/wakabaseisei/ms-protobuf/gen/go v0.0.4
 	golang.org/x/net v0.33.0
 )
 
@@ -29,6 +28,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
