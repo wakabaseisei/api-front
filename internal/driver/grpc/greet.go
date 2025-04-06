@@ -13,7 +13,10 @@ func (s *APIFrontService) Greet(
 	ctx context.Context,
 	req *connect.Request[apifrontv1.GreetRequest],
 ) (*connect.Response[apifrontv1.GreetResponse], error) {
-	return nil, fmt.Errorf("unimplemented")
+	res := connect.NewResponse(&apifrontv1.GreetResponse{
+		Greeting: fmt.Sprintf("Hello, %s!", req.Msg.GetName()),
+	})
+	return res, nil
 	// log.Println("Request headers: ", req.Header())
 
 	// cmd := &domain.UserCommand{
