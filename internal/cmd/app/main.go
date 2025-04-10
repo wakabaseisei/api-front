@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"buf.build/gen/go/wakabaseisei/ms-protobuf/connectrpc/go/ms/apifront/v1/apifrontv1connect"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/wakabaseisei/api-front/internal/domain/repository"
 	"github.com/wakabaseisei/api-front/internal/driver/grpc"
 	infraRepo "github.com/wakabaseisei/api-front/internal/repository"
-	"github.com/wakabaseisei/ms-protobuf/gen/go/ms/apifront/v1/apifrontv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

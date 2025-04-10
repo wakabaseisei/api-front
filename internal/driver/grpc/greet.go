@@ -6,7 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 
-	apifrontv1 "github.com/wakabaseisei/ms-protobuf/gen/go/ms/apifront/v1"
+	apifrontv1 "buf.build/gen/go/wakabaseisei/ms-protobuf/protocolbuffers/go/ms/apifront/v1"
 )
 
 func (s *APIFrontService) Greet(
