@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"buf.build/gen/go/wakabaseisei/ms-protobuf/connectrpc/go/ms/apifront/v1/apifrontv1connect"
+	connctcors "connectrpc.com/cors"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/rs/cors"
 	"github.com/wakabaseisei/api-front/internal/domain/repository"
 	"github.com/wakabaseisei/api-front/internal/driver/grpc"
 	infraRepo "github.com/wakabaseisei/api-front/internal/repository"
@@ -50,7 +52,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    "0.0.0.0:8080",
-		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		Handler: withCORS(h2c.NewHandler(mux, &http2.Server{})),
 	}
 
 	done := make(chan error, 1)
@@ -85,4 +87,15 @@ func closeDBConn(db io.Closer) {
 	} else {
 		log.Println("db connection gracefully closed")
 	}
+}
+
+func withCORS(h http.Handler) http.Handler {
+	middleware := cors.New(cors.Options{
+		// TODO:
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: connctcors.AllowedMethods(),
+		AllowedHeaders: connctcors.AllowedHeaders(),
+		ExposedHeaders: connctcors.ExposedHeaders(),
+	})
+	return middleware.Handler(h)
 }
