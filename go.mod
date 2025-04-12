@@ -6,6 +6,7 @@ require (
 	buf.build/gen/go/wakabaseisei/ms-protobuf/connectrpc/go v1.18.1-20250409105742-a204320cd61b.1
 	buf.build/gen/go/wakabaseisei/ms-protobuf/protocolbuffers/go v1.36.6-20250409105742-a204320cd61b.1
 	connectrpc.com/connect v1.18.1
+	connectrpc.com/cors v0.1.0
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.9
@@ -13,6 +14,7 @@ require (
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/golang-migrate/migrate/v4 v4.18.2
+	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.33.0
 )
 
