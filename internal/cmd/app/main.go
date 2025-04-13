@@ -93,7 +93,7 @@ func withCORS(h http.Handler) http.Handler {
 	middleware := cors.New(cors.Options{
 		// TODO:
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: append(connctcors.AllowedMethods(), "OPTIONS"),
+		AllowedMethods: connctcors.AllowedMethods(),
 		AllowedHeaders: connctcors.AllowedHeaders(),
 		ExposedHeaders: connctcors.ExposedHeaders(),
 	})
