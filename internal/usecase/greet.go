@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/wakabaseisei/api-front/internal/domain"
-	"github.com/wakabaseisei/api-front/internal/domain/repository"
+	"github.com/wakabaseisei/api-front/internal/domain/service"
 )
 
 type GreetInteractor interface {
@@ -13,12 +13,12 @@ type GreetInteractor interface {
 }
 
 type geetInteractor struct {
-	userRepository repository.UserRepository
+	userService service.UserService
 }
 
-func NewGreetInteractor(userRepo repository.UserRepository) GreetInteractor {
+func NewGreetInteractor(userRepo service.UserService) GreetInteractor {
 	return &geetInteractor{
-		userRepository: userRepo,
+		userService: userRepo,
 	}
 }
 
@@ -29,13 +29,9 @@ func (i *geetInteractor) Invoke(
 	*domain.User,
 	error,
 ) {
-	if rerr := i.userRepository.Create(ctx, cmd); rerr != nil {
-		return nil, fmt.Errorf("userRepository Create: %v", rerr)
-	}
-
-	user, ferr := i.userRepository.FindByID(ctx, cmd.ID)
-	if ferr != nil {
-		return nil, fmt.Errorf("userRepository FindByID: %v", ferr)
+	user, rerr := i.userService.CreateUser(ctx, cmd)
+	if rerr != nil {
+		return nil, fmt.Errorf("userService Create: %v", rerr)
 	}
 
 	return user, nil

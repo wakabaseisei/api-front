@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os/signal"
@@ -14,34 +13,24 @@ import (
 	connctcors "connectrpc.com/cors"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/rs/cors"
-	"github.com/wakabaseisei/api-front/internal/domain/repository"
+	"github.com/wakabaseisei/api-front/internal/config"
+	"github.com/wakabaseisei/api-front/internal/domain/service"
+	"github.com/wakabaseisei/api-front/internal/driver/client"
 	"github.com/wakabaseisei/api-front/internal/driver/grpc"
-	infraRepo "github.com/wakabaseisei/api-front/internal/repository"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
-	// TODO: Enable later
-	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	// defer cancel()
-
-	// cfg, cerr := config.NewConfig(ctx)
-	// if cerr != nil {
-	// 	log.Fatalf("New Config: %v", cerr)
-	// }
-
-	// dbConn, dberr := infraRepo.NewDatabase(ctx, cfg.DBConfig, cfg.AWSDefaultConfig)
-	// if dberr != nil {
-	// 	log.Fatalf("New database: %v", dberr)
-	// }
-	// defer closeDBConn(dbConn)
+	cfg, cerr := config.NewConfig()
+	if cerr != nil {
+		log.Fatalf("New Config: %v", cerr)
+	}
 
 	sgCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	// TODO: Enable later
-	services := repository.NewServices(infraRepo.NewUserRepository(nil))
+	services := service.NewServices(client.NewUserService(cfg.UserServiceEndpoint))
 	service := grpc.NewAPIFrontService(services)
 	mux := http.NewServeMux()
 
@@ -79,14 +68,6 @@ func main() {
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, "OK")
-}
-
-func closeDBConn(db io.Closer) {
-	if cerr := db.Close(); cerr != nil {
-		log.Printf("closing db connection: %v", cerr)
-	} else {
-		log.Println("db connection gracefully closed")
-	}
 }
 
 func withCORS(h http.Handler) http.Handler {

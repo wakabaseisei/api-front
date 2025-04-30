@@ -1,12 +1,12 @@
 package grpc
 
-import "github.com/wakabaseisei/api-front/internal/domain/repository"
+import "github.com/wakabaseisei/api-front/internal/domain/service"
 
 type APIFrontService struct {
-	services *repository.Services
+	services *service.Services
 }
 
-func NewAPIFrontService(services *repository.Services) *APIFrontService {
+func NewAPIFrontService(services *service.Services) *APIFrontService {
 	return &APIFrontService{
 		services: services,
 	}
